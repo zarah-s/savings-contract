@@ -19,17 +19,47 @@ describe("Savings", function () {
     return { savings, owner, otherAccount };
   }
 
-  describe("Deposit", function () {
-    it("Check if increment balance", async function () {
-      const { savings, owner } = await loadFixture(deployContract);
-      await savings.deposit({ value: 1 });
-      const checkSavings = await savings.checkSavings(owner);
-      expect(checkSavings).eq(1)
 
-    });
+  describe("Validate address zero", async () => {
+    it("check against address zero", async () => {
+      const { owner } = await loadFixture(deployContract);
+
+      expect(owner).not.equals(0x0000000000000000000000000000000000000000);
+
+    })
 
 
-  });
+    describe("Deposit", async () => {
+
+
+      it("Check if deposit value is greater that zero", async () => {
+        const { savings, } = await loadFixture(deployContract);
+        const deposited = await savings.deposit({ value: 10 });
+        expect(deposited.value).eq(10);
+      })
+
+
+      it("Check if increment balance", async () => {
+        const { savings, owner } = await loadFixture(deployContract);
+        await savings.deposit({ value: 10 });
+        const checkBalance = await savings.checkSavings(owner);
+        expect(checkBalance).eq(10);
+      })
+
+
+      it("Test for  event emit", async () => {
+        const { savings, owner } = await loadFixture(deployContract);
+        const amount = 10;
+
+        await expect(await savings.deposit({ value: amount }))
+          .to.emit(savings, 'SavingSuccessful')
+          .withArgs(owner, amount);
+      })
+    })
+
+  })
+
+
 
 
   describe("Withdraw", function () {
